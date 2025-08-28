@@ -93,6 +93,7 @@ impl CostFunction for SimOptimizerCost {
     type Param = Vec<Float>;
     type Output = Float;
 
+    /// Function to be minimized
     fn cost(&self, param: &Self::Param) -> Result<Self::Output, argmin::core::Error> {
         let particle_distance_threshold = ParticleDistanceThreshold(param[0]);
         let speed = Speed(param[1]);

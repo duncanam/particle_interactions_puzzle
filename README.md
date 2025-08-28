@@ -136,6 +136,19 @@ but for simplicity and time the existing technique was used. However, `kiddo`
 would be a good crate candidate to do this calc if we wanted to expand it in
 the future.
 
+#### Optimization
+For the optimization problem, `optimize.rs` was leveraged. Inside, we use `argmin`,
+a numerical optimization and root solving crate. From this, we use the Nelder-Mead
+method to actually perform the optimization of the noise parameter. I like Nelder-Mead
+because it's extremely robust, as it marches a simplex around the domain and doesn't
+fall off numerical cliffs easily. It's also a multidimentional optimizer, which is
+required for this problem. The gotcha of this optimizer is that the initial simplex
+selection is important, and makes it sensitive to local minima. The residual function
+fed to Nelder-Mead to optimize is simply taking a simulation slightly on each side
+of the target noise, and minimizing when the delta of both sides is fairly large.
+Decreasing the target noise offsets will incur greater accuracy at the cost of
+requiring more iterations. A reasonable default of 5% on each side was selected.
+
 #### Types
 `types.rs` introduces zero-cost (removed by LLVM at compile-time) type wrappers that
 give us type stability so we don't mix up floats when passing them around the codebase.
@@ -143,3 +156,11 @@ It also introduces a type alias for floats, such that the codebase can be swappe
 between 64-bit and 32-bit if desired. I've found it's much easier to do this upfront
 rather than go back and add it later. A convenience macro exists to create the
 types, which also implements `+` between themselves and `*` with a float.
+
+#### Math
+Inside `math.rs` lives a convenience trait for math helpers was created to optimize
+`x^2`. However, this is likely overkill and probably can be removed. Truthfully,
+I thought I'd add more into this module.
+
+#### Library and Python Bindings
+Inside `lib.rs` lives the top-level library and PyO3's Python bindings.
