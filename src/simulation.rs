@@ -149,13 +149,21 @@ impl Display for Simulation {
 
 /// Storage API for simulation data
 pub struct SimulationData {
+    /// x-position for each particle
     pub x: Vec<Float>,
+
+    /// y-position for each particle
     pub y: Vec<Float>,
+
+    /// Particle direction in x
     pub u: Vec<Float>,
+
+    /// Particle direction in y
     pub v: Vec<Float>,
 }
 
 impl From<&Simulation> for SimulationData {
+    /// Generate from a Simulation
     fn from(sim: &Simulation) -> Self {
         let x = sim
             .particles
