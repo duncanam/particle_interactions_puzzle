@@ -127,18 +127,15 @@ impl Particle {
             .map(|particle| {
                 // Decompose these with Euler's formula
                 // v * e^{i \theta_j(t)} = v * (\cos(\theta_j) + i*\sin(\theta_j))
-                let sum_term_1 = speed.0 * Complex::new(particle.theta.cos(), particle.theta.sin());
-
-                // \eta * e^{i \xi_n(t)} = \eta * (\cos(\xi_j) + i*\sin(\xi_j))
-                let sum_term_2 = noise.0 * Complex::new(particle.phase.cos(), particle.phase.sin());
-
-                sum_term_1 + sum_term_2
+                speed.0 * Complex::new(particle.theta.cos(), particle.theta.sin())
             })
             // ...then compute the sum.
             .sum();
 
-        // Already validated in sim setup that number of particles >=1.
-        let arg_argument = 1.0 / num_closest as f64 * summed_terms;
+        // \eta * e^{i \xi_n(t)} = \eta * (\cos(\xi_n) + i*\sin(\xi_n))
+        let noise_term = noise.0 * Complex::new(self.phase.cos(), self.phase.sin());
+
+        let arg_argument = 1.0 / num_closest as f64 * summed_terms + noise_term;
 
         // Lastly, we compute the angle per equation 1
         arg_argument.arg()
