@@ -95,11 +95,12 @@ impl Particle {
             .map(|idx| &particles.0[idx])
             // ...then compute each sum term...
             .map(|particle| {
-                // v * e^{i \theta_j(t)}
-                let sum_term_1 = speed.0 * Complex::new(particle.theta, 1.0);
+                // Decompose these with Euler's formula
+                // v * e^{i \theta_j(t)} = v * (\cos(\theta_j) + i*\sin(\theta_j))
+                let sum_term_1 = speed.0 * Complex::new(particle.theta.cos(), particle.theta.sin());
 
-                // \eta * e^{i \xi_n(t)}
-                let sum_term_2 = noise.0 * Complex::new(particle.phase, 1.0);
+                // \eta * e^{i \xi_n(t)} = \eta * (\cos(\xi_j) + i*\sin(\xi_j))
+                let sum_term_2 = noise.0 * Complex::new(particle.phase.cos(), particle.phase.sin());
 
                 sum_term_1 + sum_term_2
             })
