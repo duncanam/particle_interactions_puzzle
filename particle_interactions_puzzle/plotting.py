@@ -50,7 +50,7 @@ def plot_stationary_order_parameter(
     num_particles, domain_size, particle_distance_threshold, velocity, timestep
 ):
     """Plot the stationary order parameter as a function of noise"""
-    noise = np.linspace(0.001, 0.999, 10)
+    noise = np.linspace(0.001, 0.999, 20)
 
     def stationary_order(eta):
         return compute_stationary_order_parameter(
