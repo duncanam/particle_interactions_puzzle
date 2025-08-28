@@ -40,7 +40,10 @@ pub fn optimize_for_critical_noise(
         .run()
         .context("run failed")?;
 
-    let best_param = result.state.best_param.ok_or_else(|| anyhow!("todo"))?;
+    let best_param = result
+        .state
+        .best_param
+        .ok_or_else(|| anyhow!("optimizer found no best parameters"))?;
     let best_particle_distance_threshold = ParticleDistanceThreshold(best_param[0]);
     let best_speed = Speed(best_param[1]);
 
@@ -51,7 +54,6 @@ struct SimOptimizerCost {
     num_particles: usize,
     boundary_side_length: DomainBoundaryLength,
     timestep: RelativeTime,
-    noise_critical_target: Noise,
     noise_critical_left: Noise,
     noise_critical_right: Noise,
 }
@@ -70,7 +72,6 @@ impl SimOptimizerCost {
             num_particles,
             boundary_side_length,
             timestep,
-            noise_critical_target,
             noise_critical_left,
             noise_critical_right,
         }

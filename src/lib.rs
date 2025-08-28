@@ -7,6 +7,7 @@ mod simulation;
 mod types;
 
 // Exports for pure Rust use
+pub use optimize::optimize_for_critical_noise;
 pub use simulation::{Simulation, SimulationData};
 pub use types::{
     AbsoluteTime, DomainBoundaryLength, Float, Noise, ParticleDistanceThreshold, RelativeTime,
@@ -16,6 +17,7 @@ pub use types::{
 #[pymodule]
 fn particle_interactions_puzzle(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PySimulation>()?;
+    m.add_function(wrap_pyfunction!(py_optimize_for_critical_noise, m)?)?;
 
     Ok(())
 }
@@ -110,4 +112,21 @@ impl PySimulationData {
         // Must clone because Python has no concept of ownership lol
         self.0.v.clone()
     }
+}
+
+#[pyfunction(name = "optimize_for_critical_noise")]
+fn py_optimize_for_critical_noise(
+    num_particles: usize,
+    boundary_side_length: Float,
+    timestep: Float,
+    noise_critical_target: Float,
+) -> PyResult<(Float, Float)> {
+    let (particle_distance_threshold, speed) = optimize_for_critical_noise(
+        num_particles,
+        DomainBoundaryLength(boundary_side_length),
+        RelativeTime(timestep),
+        Noise(noise_critical_target),
+    )?;
+
+    Ok((particle_distance_threshold.0, speed.0))
 }
