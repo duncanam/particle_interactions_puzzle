@@ -82,10 +82,12 @@ impl Simulation {
 
 impl Display for Simulation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "=================== Simulation ===================")?;
-        write!(f, "Current time: {}", self.current_time.0)?;
-        write!(f, "Particles: {}", self.particles.len())?;
-        write!(f, "Domain size: {}", self.params.boundary_side_length.0)?;
-        write!(f, "Timestep: {}", self.params.timestep.0)
+        writeln!(f, "=================== Simulation ===================")?;
+        writeln!(f, "Current time: {}", self.current_time.0)?;
+        writeln!(f, "Particles: {}", self.particles.len())?;
+        writeln!(f, "Domain size: {}", self.params.boundary_side_length.0)?;
+        writeln!(f, "Timestep: {}", self.params.timestep.0)?;
+        writeln!(f, "Noise: {}", self.params.noise.0)?;
+        writeln!(f, "Particle speed: {}", self.params.speed.0)
     }
 }
