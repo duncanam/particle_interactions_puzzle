@@ -4,7 +4,7 @@ use num::Complex;
 
 use crate::{
     math::Math,
-    types::{Float, Noise, Speed},
+    types::{Float, Noise, RelativeTime, Speed},
 };
 
 /// Represents 360 degrees of spatial rotation available
@@ -108,6 +108,36 @@ impl Particle {
         arg_argument.arg()
     }
 
+    /// Compute the new spatial coordinates
+    fn compute_new_coords(&self, speed: Speed, delta_time: RelativeTime) -> (f64, f64) {
+        let new_pos_x = self.pos_x + speed.0 * delta_time.0 * self.theta.cos();
+        let new_pos_y = self.pos_y + speed.0 * delta_time.0 * self.theta.sin();
+
+        (new_pos_x, new_pos_y)
+    }
+
+    /// Temporally update the particle to a new angle and position
+    fn to_updated(
+        &self,
+        particles: &Particles,
+        distance_threshold: Float,
+        speed: Speed,
+        noise: Noise,
+        delta_time: RelativeTime,
+    ) -> Self {
+        let theta = self.compute_new_theta(particles, distance_threshold, speed, noise);
+        let (pos_x, pos_y) = self.compute_new_coords(speed, delta_time);
+        let phase = Self::sample_random_phase();
+
+        Self {
+            pos_x,
+            pos_y,
+            theta,
+            phase,
+            id: self.id,
+        }
+    }
+
     /// Get the indices of the closest particles in the swarm given a `distance`.
     ///
     /// # Notes
@@ -158,6 +188,24 @@ impl Particles {
                 // ...instantiate a random new one...
                 .map(|id| Particle::new(id, boundary_side_length))
                 // ...then collect all the particles together into this data structure.
+                .collect(),
+        )
+    }
+
+    /// Temporally update the particles to new angles and positions
+    pub(crate) fn to_updated(
+        &self,
+        distance_threshold: Float,
+        speed: Speed,
+        noise: Noise,
+        delta_time: RelativeTime,
+    ) -> Self {
+        Self(
+            self.0
+                .iter()
+                .map(|particle| {
+                    particle.to_updated(self, distance_threshold, speed, noise, delta_time)
+                })
                 .collect(),
         )
     }
