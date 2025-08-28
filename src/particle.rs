@@ -4,7 +4,7 @@ use num::Complex;
 
 use crate::{
     math::Math,
-    types::{Float, Noise, RelativeTime, Speed},
+    types::{Float, Noise, ParticleDistanceThreshold, RelativeTime, Speed},
 };
 
 /// Represents 360 degrees of spatial rotation available
@@ -71,7 +71,7 @@ impl Particle {
     fn compute_new_theta(
         &self,
         particles: &Particles,
-        distance_threshold: Float,
+        distance_threshold: ParticleDistanceThreshold,
         speed: Speed,
         noise: Noise,
     ) -> Float {
@@ -117,10 +117,10 @@ impl Particle {
     }
 
     /// Temporally update the particle to a new angle and position
-    fn to_updated(
+    fn to_timestepped(
         &self,
         particles: &Particles,
-        distance_threshold: Float,
+        distance_threshold: ParticleDistanceThreshold,
         speed: Speed,
         noise: Noise,
         delta_time: RelativeTime,
@@ -148,7 +148,7 @@ impl Particle {
     fn compute_idxs_closest(
         &self,
         particles: &Particles,
-        distance_threshold: Float,
+        distance_threshold: ParticleDistanceThreshold,
     ) -> IdxsNeighborParticles {
         IdxsNeighborParticles(
             particles
@@ -159,7 +159,7 @@ impl Particle {
                 .filter(|particle| self.id != particle.id)
                 // ...and then for each particle we compute the euclidean distance between them,
                 // filtering out any particles that are further away than our threshold...
-                .filter(|particle| self.compute_euclidean_distance(particle) < distance_threshold)
+                .filter(|particle| self.compute_euclidean_distance(particle) < distance_threshold.0)
                 // ...and then we snag the remaining, filtered indices for particles we know are
                 // within the threshold distance...
                 .map(|particle| particle.id)
@@ -193,9 +193,9 @@ impl Particles {
     }
 
     /// Temporally update the particles to new angles and positions
-    pub(crate) fn to_updated(
+    pub(crate) fn to_timestepped(
         &self,
-        distance_threshold: Float,
+        distance_threshold: ParticleDistanceThreshold,
         speed: Speed,
         noise: Noise,
         delta_time: RelativeTime,
@@ -204,7 +204,7 @@ impl Particles {
             self.0
                 .iter()
                 .map(|particle| {
-                    particle.to_updated(self, distance_threshold, speed, noise, delta_time)
+                    particle.to_timestepped(self, distance_threshold, speed, noise, delta_time)
                 })
                 .collect(),
         )
