@@ -62,6 +62,11 @@ impl PySimulation {
     fn get_data(&self) -> PySimulationData {
         PySimulationData((&self.0).into())
     }
+
+    #[getter]
+    fn boundary_side_length(&self) -> f64 {
+        self.0.params.boundary_side_length.0
+    }
 }
 
 #[pyclass(name = "SimulationData")]

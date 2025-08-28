@@ -20,5 +20,7 @@ def plot_simulation_timestep(sim):
         color="black",
         pivot="middle",
     )
-    ax.set_aspect("equal", "box")
+    ax.set_aspect("equal")
+    ax.set_xlim(0, sim.boundary_side_length)
+    ax.set_ylim(0, sim.boundary_side_length)
     plt.show()
