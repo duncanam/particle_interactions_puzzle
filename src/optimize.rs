@@ -10,10 +10,12 @@ use crate::{
 };
 
 /// Defines how the left and right points are selected for the critical noise optimizer
-const NOISE_CRITICAL_OFFSET: Float = 0.1;
+const NOISE_CRITICAL_OFFSET: Float = 0.05;
 
 /// Defines how large of a difference in right/left stationary order params define criticality
 const CRITICAL_STATIONARY_ORDER_PARAM_DELTA: Float = 0.25;
+
+const MAX_NELDER_MEAD_ITERATIONS: u64 = 100;
 
 /// Optimize speed and the radius threshold to find a target noise
 pub fn optimize_for_critical_noise(
@@ -22,6 +24,7 @@ pub fn optimize_for_critical_noise(
     timestep: RelativeTime,
     noise_critical_target: Noise,
 ) -> anyhow::Result<(ParticleDistanceThreshold, Speed)> {
+    // This will be our residual function
     let cost = SimOptimizerCost::new(
         num_particles,
         boundary_side_length,
@@ -29,6 +32,10 @@ pub fn optimize_for_critical_noise(
         noise_critical_target,
     );
 
+    // Initial conditions for the Nelder-Mead simplex to meander about. These are rough
+    // and it's very robust. However, this is still quite impactful, especially for many
+    // local minima.
+    // TODO: global const these
     let initial_simplex = vec![vec![1.0, 1.0], vec![1.5, 1.0], vec![1.0, 1.5]];
 
     let solver = NelderMead::new(initial_simplex)
@@ -36,7 +43,7 @@ pub fn optimize_for_critical_noise(
         .context("could not initialize NelderMead with tolerance")?;
 
     let result = Executor::new(cost, solver)
-        .configure(|state| state.max_iters(100))
+        .configure(|state| state.max_iters(MAX_NELDER_MEAD_ITERATIONS))
         .run()
         .context("run failed")?;
 
@@ -50,6 +57,7 @@ pub fn optimize_for_critical_noise(
     Ok((best_particle_distance_threshold, best_speed))
 }
 
+/// This defines the cost function for Nelder-Mead to optimize against
 struct SimOptimizerCost {
     num_particles: usize,
     boundary_side_length: DomainBoundaryLength,
@@ -65,6 +73,9 @@ impl SimOptimizerCost {
         timestep: RelativeTime,
         noise_critical_target: Noise,
     ) -> Self {
+        // We set up the optimizer by considering target noise on either side of the target,
+        // through an offset. This is roughly approximate, and can be made better through actually
+        // solving the \psi routine directly in the optimizer but IMO this is "good enough"
         let noise_critical_left = noise_critical_target * (1.0 - NOISE_CRITICAL_OFFSET);
         let noise_critical_right = noise_critical_target * (1.0 + NOISE_CRITICAL_OFFSET);
 
@@ -117,6 +128,8 @@ impl CostFunction for SimOptimizerCost {
         let delta_stationary_order_param =
             stationary_order_param_left - stationary_order_param_right;
 
+        // If the left and right points for the stationary order param show significant change,
+        // this likely means we've hit our target point
         let residual = (delta_stationary_order_param - CRITICAL_STATIONARY_ORDER_PARAM_DELTA).abs();
 
         Ok(residual)
