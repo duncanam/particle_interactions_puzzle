@@ -27,6 +27,8 @@ Sync deps for the project into the ephemeral virtual environment:
 uv sync
 ```
 
+---
+
 ## Usage
 See `examples/project.ipynb` / `examples/project.pdf`. This Jupyter notebook executes
 the Python bindings for the Rust tools, and also plots some results. This notebook
@@ -164,3 +166,29 @@ I thought I'd add more into this module.
 
 #### Library and Python Bindings
 Inside `lib.rs` lives the top-level library and PyO3's Python bindings.
+
+#### Plotting
+Inside `plotting.py` exists Matplotlib tooling to plot vectors of the state-space
+of the model.
+
+---
+
+### Problem Discussion
+
+#### Problem 1
+This took the longest, as most of the time was spend trying to understand the problem
+and transform it into software. I re-learned how to decompose complex numbers and
+compute angles with them (I had forgotten all this notation), and spend quite a bit
+of time decoding specifics on the notation of especially Equation 1. Only after
+that did I discover this is actually a common problem (Vicsek model), so that would
+have helped me decode faster. However, once the notation was decoded, implementation
+was pretty smooth and simple. I did also need to ponder how best to do periodic
+boundary conditions. Eventually I found a clever mention online of using the modulus
+operator to do this, which worked wonderfully.
+
+One of the most rewarding aspects of this problems was progressively iterating forward
+the model state in time, noting the plot output in the Jupyter notebook and seeing
+the particle swarm move around.
+
+#### Problem 2
+
