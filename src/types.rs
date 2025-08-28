@@ -1,5 +1,5 @@
 use core::f64;
-use std::ops::Add;
+use std::ops::{Add, Mul};
 
 #[cfg(feature = "f64")]
 pub type Float = f64;
@@ -17,6 +17,20 @@ macro_rules! create_quantity {
     ($name:ident) => {
         #[derive(Copy, Clone, Debug)]
         pub struct $name(pub Float);
+
+        impl Add for $name {
+            type Output = $name;
+            fn add(self, rhs: Self) -> Self::Output {
+                Self(self.0 + rhs.0)
+            }
+        }
+
+        impl Mul<Float> for $name {
+            type Output = $name;
+            fn mul(self, rhs: Float) -> Self::Output {
+                Self(self.0 * rhs)
+            }
+        }
     };
 }
 

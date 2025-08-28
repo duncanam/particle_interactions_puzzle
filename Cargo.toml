@@ -12,6 +12,9 @@ pyo3 = { version = "0.25.0", features = ["anyhow"] }
 anyhow = "1.0.99"
 num = "0.4.3"
 rand = "0.9.2"
+argmin = { version = "0.10.0" }
+argmin-math = { version = "0.4.0", features = ["ndarray_latest"] }
+ndarray = "0.16"
 
 # This is to allow us to run simulations in 32-bit mode, which is a performance/fidelity trade
 [features]

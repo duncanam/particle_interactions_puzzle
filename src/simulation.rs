@@ -115,7 +115,7 @@ impl Simulation {
             instantaneous_order_window.push_back(sim.instantaneous_order.0);
 
             // Sliding average of the parameter over time
-            // TODO: could consider a running sum to optimize
+            // TODO: could consider a running sum to optimize (reduce evaluations)
             let stationary_order_parameter = instantaneous_order_window.iter().sum::<Float>()
                 / instantaneous_order_window.len() as f64;
 

@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
 mod math;
+mod optimize;
 mod particle;
 mod simulation;
 mod types;
