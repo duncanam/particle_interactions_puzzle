@@ -1,10 +1,10 @@
-use std::f64::consts::PI;
-
 use num::Complex;
 
 use crate::{
     math::Math,
-    types::{DomainBoundaryLength, Float, Noise, ParticleDistanceThreshold, RelativeTime, Speed},
+    types::{
+        DomainBoundaryLength, Float, Noise, PI, ParticleDistanceThreshold, RelativeTime, Speed,
+    },
 };
 
 /// Represents 360 degrees of spatial rotation available
@@ -135,14 +135,14 @@ impl Particle {
         // \eta * e^{i \xi_n(t)} = \eta * (\cos(\xi_n) + i*\sin(\xi_n))
         let noise_term = noise.0 * Complex::new(self.phase.cos(), self.phase.sin());
 
-        let arg_argument = 1.0 / num_closest as f64 * summed_terms + noise_term;
+        let arg_argument = 1.0 / num_closest as Float * summed_terms + noise_term;
 
         // Lastly, we compute the angle per equation 1
         arg_argument.arg()
     }
 
     /// Compute the new spatial coordinates
-    fn compute_new_coords(&self, speed: Speed, delta_time: RelativeTime) -> (f64, f64) {
+    fn compute_new_coords(&self, speed: Speed, delta_time: RelativeTime) -> (Float, Float) {
         let new_pos_x = self.pos_x + speed.0 * delta_time.0 * self.theta.cos();
         let new_pos_y = self.pos_y + speed.0 * delta_time.0 * self.theta.sin();
 
@@ -265,6 +265,23 @@ impl Particles {
                 })
                 .collect(),
         )
+    }
+
+    /// Compute the polarization of the system
+    pub(crate) fn compute_polarization(&self) -> Float {
+        let sum: Complex<_> = self
+            .0
+            // Iterate over all particles...
+            .iter()
+            // ...and extract their polarization term, noting that the 1/v cancels with the v in
+            // the sum...
+            .map(|particle| Complex::new(particle.theta.cos(), particle.theta.sin()))
+            // ...and finally sum.
+            .sum();
+
+        // Equivalent to 1/N * |sum| as seen in the equation, once again noting the cancellation of
+        // v in the terms
+        sum.norm() / self.len() as Float
     }
 
     /// Get the number of particles

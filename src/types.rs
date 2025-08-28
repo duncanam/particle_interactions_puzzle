@@ -1,15 +1,22 @@
+use core::f64;
 use std::ops::Add;
 
 #[cfg(feature = "f64")]
-pub(crate) type Float = f64;
+pub type Float = f64;
 
 #[cfg(not(feature = "f64"))]
-pub(crate) type Float = f32;
+pub type Float = f32;
+
+#[cfg(feature = "f64")]
+pub(crate) const PI: f64 = std::f64::consts::PI;
+
+#[cfg(not(feature = "f64"))]
+pub(crate) const PI: f32 = std::f32::consts::PI;
 
 macro_rules! create_quantity {
     ($name:ident) => {
         #[derive(Copy, Clone, Debug)]
-        pub struct $name(pub f64);
+        pub struct $name(pub Float);
     };
 }
 

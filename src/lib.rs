@@ -8,7 +8,8 @@ mod types;
 // Exports for pure Rust use
 pub use simulation::{Simulation, SimulationData};
 pub use types::{
-    AbsoluteTime, DomainBoundaryLength, Noise, ParticleDistanceThreshold, RelativeTime, Speed,
+    AbsoluteTime, DomainBoundaryLength, Float, Noise, ParticleDistanceThreshold, RelativeTime,
+    Speed,
 };
 
 #[pymodule]
@@ -27,11 +28,11 @@ impl PySimulation {
     #[new]
     fn new(
         num_particles: usize,
-        boundary_side_length: f64,
-        noise: f64,
-        speed: f64,
-        timestep: f64,
-        particle_distance_threshold: f64,
+        boundary_side_length: Float,
+        noise: Float,
+        speed: Float,
+        timestep: Float,
+        particle_distance_threshold: Float,
     ) -> PyResult<Self> {
         let boundary_side_length = DomainBoundaryLength(boundary_side_length);
         let noise = Noise(noise);
@@ -64,12 +65,12 @@ impl PySimulation {
     }
 
     #[getter]
-    fn boundary_side_length(&self) -> f64 {
+    fn boundary_side_length(&self) -> Float {
         self.0.params.boundary_side_length.0
     }
 
     #[getter]
-    fn current_time(&self) -> f64 {
+    fn current_time(&self) -> Float {
         self.0.current_time.0
     }
 }
@@ -80,25 +81,25 @@ struct PySimulationData(SimulationData);
 #[pymethods]
 impl PySimulationData {
     #[getter]
-    fn x(&self) -> Vec<f64> {
+    fn x(&self) -> Vec<Float> {
         // Must clone because Python has no concept of ownership lol
         self.0.x.clone()
     }
 
     #[getter]
-    fn y(&self) -> Vec<f64> {
+    fn y(&self) -> Vec<Float> {
         // Must clone because Python has no concept of ownership lol
         self.0.y.clone()
     }
 
     #[getter]
-    fn u(&self) -> Vec<f64> {
+    fn u(&self) -> Vec<Float> {
         // Must clone because Python has no concept of ownership lol
         self.0.u.clone()
     }
 
     #[getter]
-    fn v(&self) -> Vec<f64> {
+    fn v(&self) -> Vec<Float> {
         // Must clone because Python has no concept of ownership lol
         self.0.v.clone()
     }
