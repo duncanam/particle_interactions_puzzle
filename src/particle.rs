@@ -124,10 +124,16 @@ impl Particle {
         speed: Speed,
         noise: Noise,
         delta_time: RelativeTime,
+        boundary_side_length: DomainBoundaryLength,
     ) -> Self {
         let theta = self.compute_new_theta(particles, distance_threshold, speed, noise);
         let (pos_x, pos_y) = self.compute_new_coords(speed, delta_time);
         let phase = Self::sample_random_phase();
+
+        // Enforce periodic boundary condition using modulus. Would normally use `%` operator but
+        // for floats we need to use something a bit more special.
+        let pos_x = pos_x.rem_euclid(boundary_side_length.0);
+        let pos_y = pos_y.rem_euclid(boundary_side_length.0);
 
         Self {
             pos_x,
@@ -199,12 +205,20 @@ impl Particles {
         speed: Speed,
         noise: Noise,
         delta_time: RelativeTime,
+        boundary_side_length: DomainBoundaryLength,
     ) -> Self {
         Self(
             self.0
                 .iter()
                 .map(|particle| {
-                    particle.to_timestepped(self, distance_threshold, speed, noise, delta_time)
+                    particle.to_timestepped(
+                        self,
+                        distance_threshold,
+                        speed,
+                        noise,
+                        delta_time,
+                        boundary_side_length,
+                    )
                 })
                 .collect(),
         )

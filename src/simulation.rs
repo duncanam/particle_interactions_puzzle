@@ -67,6 +67,7 @@ impl Simulation {
             self.params.speed,
             self.params.noise,
             self.params.timestep,
+            self.params.boundary_side_length,
         );
 
         let current_time = self.current_time + self.params.timestep;
