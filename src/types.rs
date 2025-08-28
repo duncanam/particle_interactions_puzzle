@@ -26,6 +26,7 @@ create_quantity!(Speed);
 create_quantity!(Noise);
 create_quantity!(ParticleDistanceThreshold);
 create_quantity!(DomainBoundaryLength);
+create_quantity!(InstantaneosOrder);
 
 // Sets up a nice relation for additive time
 impl Add<RelativeTime> for AbsoluteTime {

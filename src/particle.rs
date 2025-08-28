@@ -3,7 +3,8 @@ use num::Complex;
 use crate::{
     math::Math,
     types::{
-        DomainBoundaryLength, Float, Noise, PI, ParticleDistanceThreshold, RelativeTime, Speed,
+        DomainBoundaryLength, Float, InstantaneosOrder, Noise, PI, ParticleDistanceThreshold,
+        RelativeTime, Speed,
     },
 };
 
@@ -21,7 +22,7 @@ pub(crate) struct Particle {
 
 // TODO: the random number generators here are instantiating each invocation. Instead, we should
 // instantiate it once and pass it through. Benchmarking to determine if this is actually expensive
-// will determine how urgent this is.
+// will determine how urgent this is: use criterion.rs + cargo flamegraph.
 impl Particle {
     /// Generate a random linear spatial position
     #[inline]
@@ -219,9 +220,7 @@ impl Particle {
 }
 
 /// Contains all the particles.
-// We use Box<[]> over Vec<> because it more clearly conveys that the collection should not be
-// mutating.
-pub(crate) struct Particles(Box<[Particle]>);
+pub(crate) struct Particles(Vec<Particle>);
 
 impl Particles {
     /// Create a new collection of particles with random initialization
@@ -267,8 +266,8 @@ impl Particles {
         )
     }
 
-    /// Compute the polarization of the system
-    pub(crate) fn compute_polarization(&self) -> Float {
+    /// Compute the polarization / instantaneous order parameter of the system
+    pub(crate) fn compute_instantaneous_order(&self) -> InstantaneosOrder {
         let sum: Complex<_> = self
             .0
             // Iterate over all particles...
@@ -281,7 +280,7 @@ impl Particles {
 
         // Equivalent to 1/N * |sum| as seen in the equation, once again noting the cancellation of
         // v in the terms
-        sum.norm() / self.len() as Float
+        InstantaneosOrder(sum.norm() / self.len() as Float)
     }
 
     /// Get the number of particles
