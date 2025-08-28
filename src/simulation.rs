@@ -4,14 +4,16 @@ use anyhow::bail;
 
 use crate::{
     particle::Particles,
-    types::{AbsoluteTime, Noise, ParticleDistanceThreshold, RelativeTime, Speed},
+    types::{
+        AbsoluteTime, DomainBoundaryLength, Noise, ParticleDistanceThreshold, RelativeTime, Speed,
+    },
 };
 
 // By putting these parameters in their own struct it also makes the copy update more readable and
 // easier to maintain
 #[derive(Copy, Clone)]
 struct SimulationParameters {
-    boundary_side_length: f64,
+    boundary_side_length: DomainBoundaryLength,
     noise: Noise,
     speed: Speed,
     timestep: RelativeTime,
@@ -29,7 +31,7 @@ impl Simulation {
     /// Instantiate a new particle simulator with randomized initial conditions
     pub fn new(
         num_particles: usize,
-        boundary_side_length: f64,
+        boundary_side_length: DomainBoundaryLength,
         noise: Noise,
         speed: Speed,
         timestep: RelativeTime,
@@ -82,7 +84,7 @@ impl Display for Simulation {
         write!(f, "=================== Simulation ===================")?;
         write!(f, "Current time: {}", self.current_time.0)?;
         write!(f, "Particles: {}", self.particles.len())?;
-        write!(f, "Domain size: {}", self.params.boundary_side_length)?;
+        write!(f, "Domain size: {}", self.params.boundary_side_length.0)?;
         write!(f, "Timestep: {}", self.params.timestep.0)
     }
 }

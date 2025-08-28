@@ -4,7 +4,7 @@ use num::Complex;
 
 use crate::{
     math::Math,
-    types::{Float, Noise, ParticleDistanceThreshold, RelativeTime, Speed},
+    types::{DomainBoundaryLength, Float, Noise, ParticleDistanceThreshold, RelativeTime, Speed},
 };
 
 /// Represents 360 degrees of spatial rotation available
@@ -25,8 +25,8 @@ struct Particle {
 impl Particle {
     /// Generate a random linear spatial position
     #[inline]
-    fn sample_random_linear_position(boundary_side_length: Float) -> Float {
-        boundary_side_length * rand::random::<Float>()
+    fn sample_random_linear_position(boundary_side_length: DomainBoundaryLength) -> Float {
+        boundary_side_length.0 * rand::random::<Float>()
     }
 
     /// Generate a random angular position
@@ -49,7 +49,7 @@ impl Particle {
     }
 
     /// Create a new particle with random initialization
-    fn new(id: usize, boundary_side_length: Float) -> Self {
+    fn new(id: usize, boundary_side_length: DomainBoundaryLength) -> Self {
         let pos_x = Self::sample_random_linear_position(boundary_side_length);
         let pos_y = Self::sample_random_linear_position(boundary_side_length);
         let theta = Self::sample_random_angular_position();
@@ -181,7 +181,7 @@ impl Particles {
     // and nice to be able to grab an arbitrary particle's ID when iterating over an arbitrary
     // collection. Plus, it allows for refactoring into different kinds of collections and passing
     // around particles without also passing their indices separately.
-    pub(crate) fn new(num_particles: usize, boundary_side_length: Float) -> Self {
+    pub(crate) fn new(num_particles: usize, boundary_side_length: DomainBoundaryLength) -> Self {
         Self(
             // For each particle...
             (0..num_particles)
