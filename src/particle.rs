@@ -1,6 +1,11 @@
 use std::f64::consts::PI;
 
-use crate::{math::Math, types::Float};
+use num::Complex;
+
+use crate::{
+    math::Math,
+    types::{Float, Noise, Speed},
+};
 
 /// Represents 360 degrees of spatial rotation available
 const MAX_PARTICLE_ANGLE: Float = 2.0 * PI;
@@ -59,8 +64,48 @@ impl Particle {
         }
     }
 
-    fn compute_new_theta(&self, particles: &Particles) -> Float {
-        todo!()
+    /// Compute a new theta
+    ///
+    /// # Notes
+    /// This represents Equation 1
+    fn compute_new_theta(
+        &self,
+        particles: &Particles,
+        distance_threshold: Float,
+        speed: Speed,
+        noise: Noise,
+    ) -> Float {
+        let idxs_closest = self.compute_idxs_closest(particles, distance_threshold);
+
+        // This is "|s_i(t)|"
+        let num_closest = idxs_closest.0.len();
+
+        // This is \sum_{j in s_i(t)}(...) in equation 1
+        // Note: calling map 2x for readability instead of chonky inline block
+        let summed_terms: Complex<_> = idxs_closest
+            .0
+            // Iterate over all the closest particles "j"...
+            .into_iter()
+            // ...then grab their actual particle struct references for use...
+            .map(|idx| &particles.0[idx])
+            // ...then compute each sum term...
+            .map(|particle| {
+                // v * e^{i \theta_j(t)}
+                let sum_term_1 = speed.0 * Complex::new(particle.theta, 1.0);
+
+                // \eta * e^{i \xi_n(t)}
+                let sum_term_2 = noise.0 * Complex::new(particle.phase, 1.0);
+
+                sum_term_1 + sum_term_2
+            })
+            // ...then compute the sum.
+            .sum();
+
+        // Already validated in sim setup that number of particles >=1.
+        let arg_argument = 1.0 / num_closest as f64 * summed_terms;
+
+        // Lastly, we compute the angle per equation 1
+        arg_argument.arg()
     }
 
     /// Get the indices of the closest particles in the swarm given a `distance`.
@@ -101,6 +146,11 @@ pub(crate) struct Particles(Box<[Particle]>);
 
 impl Particles {
     /// Create a new collection of particles with random initialization
+    // Note: we are technically duplicating the particle IDs because we store them on both the
+    // particle struct as well as implicitly in the array itself. However, it's very readable
+    // and nice to be able to grab an arbitrary particle's ID when iterating over an arbitrary
+    // collection. Plus, it allows for refactoring into different kinds of collections and passing
+    // around particles without also passing their indices separately.
     pub(crate) fn new(num_particles: usize, boundary_side_length: Float) -> Self {
         Self(
             // For each particle...

@@ -1,3 +1,5 @@
+use anyhow::bail;
+
 use crate::{
     particle::Particles,
     types::{AbsoluteTime, Noise, RelativeTime, Speed},
@@ -22,16 +24,20 @@ impl Simulation {
         speed: Speed,
         timestep: RelativeTime,
         time_end: AbsoluteTime,
-    ) -> Self {
+    ) -> anyhow::Result<Self> {
+        if num_particles == 0 {
+            bail!("at least one particle must be simulated");
+        }
+
         let particles = Particles::new(num_particles, boundary_side_length);
 
-        Self {
+        Ok(Self {
             particles,
             boundary_side_length,
             noise,
             speed,
             timestep,
             time_end,
-        }
+        })
     }
 }
