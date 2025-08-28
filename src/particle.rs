@@ -80,6 +80,11 @@ impl Particle {
         // This is "|s_i(t)|"
         let num_closest = idxs_closest.0.len();
 
+        // If there are no close particles, stay on current heading
+        if num_closest == 0 {
+            return self.theta;
+        }
+
         // This is \sum_{j in s_i(t)}(...) in equation 1
         // Note: calling map 2x for readability instead of chonky inline block
         let summed_terms: Complex<_> = idxs_closest
