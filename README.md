@@ -191,4 +191,26 @@ the model state in time, noting the plot output in the Jupyter notebook and seei
 the particle swarm move around.
 
 #### Problem 2
+Problem 2 was interesting, as I felt like the limit computation might be able to be
+computed analytically, but I didn't want to sink too much time into that. It was
+faster/easier to step forward in time the polarization, taking note of a sliding
+average of the value to determine steady-state convergence. It was really neat
+to see the phase transition show up, and is a clearly neat aspect of this dynamical
+system. At first mine was not working well, but I figured out that my convergence
+criteria was wrong; I was not filling up my window/ring-buffer, and was instead
+early-exiting the solver loop.
 
+#### Problem 3
+This problem gave me Advent of Code vibes, where the second part of the problem is
+surprisingly long haha. At only 2 sentences, it's nuanced, and quite tricky. I knew
+an optimizer would be required in some sense. I had considered playing with something
+like a genetic algorithm to solve for both variables, but ultimately I was most familiar
+with Nelder-Mead as a black-box optimizer. It's trusty and reliable, although a bit
+slower than some other "smarter" options. My original thought was to progressively
+iterate over $\eta$, checking to see when the phase transition would occur, but then
+I realized it's probably "close enough" to instead just do 2 simulations on either side
+of the target point given some small offset. If high accuracy here is required, the
+actual window size around the target could also be shrunk and minimized inside the
+optimizer. Or, the whole problem could be reformulated into a pure function root solve,
+although that does run the risk of being messy/too expensive pending the setup as the
+solution space would need to be explored much more by the solver/optimizer.
