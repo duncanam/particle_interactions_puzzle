@@ -1,0 +1,53 @@
+use core::f64;
+use std::ops::{Add, Mul};
+
+#[cfg(feature = "f64")]
+pub type Float = f64;
+
+#[cfg(not(feature = "f64"))]
+pub type Float = f32;
+
+#[cfg(feature = "f64")]
+pub(crate) const PI: f64 = std::f64::consts::PI;
+
+#[cfg(not(feature = "f64"))]
+pub(crate) const PI: f32 = std::f32::consts::PI;
+
+macro_rules! create_quantity {
+    ($name:ident) => {
+        #[derive(Copy, Clone, Debug)]
+        pub struct $name(pub Float);
+
+        /// Implements quantity * quantity
+        impl Add for $name {
+            type Output = $name;
+            fn add(self, rhs: Self) -> Self::Output {
+                Self(self.0 + rhs.0)
+            }
+        }
+
+        /// Implements quantity * float
+        impl Mul<Float> for $name {
+            type Output = $name;
+            fn mul(self, rhs: Float) -> Self::Output {
+                Self(self.0 * rhs)
+            }
+        }
+    };
+}
+
+create_quantity!(RelativeTime);
+create_quantity!(AbsoluteTime);
+create_quantity!(Speed);
+create_quantity!(Noise);
+create_quantity!(ParticleDistanceThreshold);
+create_quantity!(DomainBoundaryLength);
+create_quantity!(InstantaneosOrder);
+
+// Sets up a nice relation for additive time
+impl Add<RelativeTime> for AbsoluteTime {
+    type Output = AbsoluteTime;
+    fn add(self, rhs: RelativeTime) -> Self::Output {
+        AbsoluteTime(self.0 + rhs.0)
+    }
+}
