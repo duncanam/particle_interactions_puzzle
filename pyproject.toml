@@ -18,3 +18,9 @@ dependencies = [
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "ipython>=8.12.3",
+]
