@@ -9,7 +9,7 @@ pub(crate) type Float = f32;
 macro_rules! create_quantity {
     ($name:ident) => {
         #[derive(Copy, Clone, Debug)]
-        pub(crate) struct $name(pub(crate) f64);
+        pub struct $name(pub f64);
     };
 }
 

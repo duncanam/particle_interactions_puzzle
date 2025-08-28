@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use anyhow::bail;
 
 use crate::{
@@ -13,12 +15,11 @@ struct SimulationParameters {
     noise: Noise,
     speed: Speed,
     timestep: RelativeTime,
-    time_end: AbsoluteTime,
     particle_distance_threshold: ParticleDistanceThreshold,
 }
 
 /// A particle interaction simulator
-struct Simulation {
+pub struct Simulation {
     particles: Particles,
     current_time: AbsoluteTime,
     params: SimulationParameters,
@@ -26,13 +27,12 @@ struct Simulation {
 
 impl Simulation {
     /// Instantiate a new particle simulator with randomized initial conditions
-    fn new(
+    pub fn new(
         num_particles: usize,
         boundary_side_length: f64,
         noise: Noise,
         speed: Speed,
         timestep: RelativeTime,
-        time_end: AbsoluteTime,
         particle_distance_threshold: ParticleDistanceThreshold,
     ) -> anyhow::Result<Self> {
         if num_particles == 0 {
@@ -46,7 +46,6 @@ impl Simulation {
             noise,
             speed,
             timestep,
-            time_end,
             particle_distance_threshold,
         };
 
@@ -60,7 +59,7 @@ impl Simulation {
     }
 
     /// Update the simulation to new timestep
-    fn to_timestepped(&self) -> Self {
+    pub fn to_timestepped(&self) -> Self {
         let particles = self.particles.to_timestepped(
             self.params.particle_distance_threshold,
             self.params.speed,
@@ -75,5 +74,15 @@ impl Simulation {
             current_time,
             params: self.params,
         }
+    }
+}
+
+impl Display for Simulation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "=================== Simulation ===================")?;
+        write!(f, "Current time: {}", self.current_time.0)?;
+        write!(f, "Particles: {}", self.particles.len())?;
+        write!(f, "Domain size: {}", self.params.boundary_side_length)?;
+        write!(f, "Timestep: {}", self.params.timestep.0)
     }
 }

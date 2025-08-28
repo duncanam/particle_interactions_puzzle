@@ -209,6 +209,11 @@ impl Particles {
                 .collect(),
         )
     }
+
+    /// Get the number of particles
+    pub(crate) fn len(&self) -> usize {
+        self.0.len()
+    }
 }
 
 /// Contains the indices for the nearest particles for a given particle
