@@ -5,7 +5,8 @@ use anyhow::bail;
 use crate::{
     particle::Particles,
     types::{
-        AbsoluteTime, DomainBoundaryLength, Noise, ParticleDistanceThreshold, RelativeTime, Speed,
+        AbsoluteTime, DomainBoundaryLength, Float, Noise, ParticleDistanceThreshold, RelativeTime,
+        Speed,
     },
 };
 
@@ -89,5 +90,43 @@ impl Display for Simulation {
         writeln!(f, "Timestep: {}", self.params.timestep.0)?;
         writeln!(f, "Noise: {}", self.params.noise.0)?;
         writeln!(f, "Particle speed: {}", self.params.speed.0)
+    }
+}
+
+/// Storage API for simulation data
+pub struct SimulationData {
+    pub x: Vec<Float>,
+    pub y: Vec<Float>,
+    pub u: Vec<Float>,
+    pub v: Vec<Float>,
+}
+
+impl From<&Simulation> for SimulationData {
+    fn from(sim: &Simulation) -> Self {
+        let x = sim
+            .particles
+            .iter()
+            .map(|particle| particle.pos_x)
+            .collect();
+
+        let y = sim
+            .particles
+            .iter()
+            .map(|particle| particle.pos_y)
+            .collect();
+
+        let u = sim
+            .particles
+            .iter()
+            .map(|particle| particle.theta.cos())
+            .collect();
+
+        let v = sim
+            .particles
+            .iter()
+            .map(|particle| particle.theta.sin())
+            .collect();
+
+        Self { x, y, u, v }
     }
 }

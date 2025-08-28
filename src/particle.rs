@@ -11,12 +11,12 @@ use crate::{
 const MAX_PARTICLE_ANGLE: Float = 2.0 * PI;
 
 /// An individual particle with spatial and rotational state
-struct Particle {
-    id: usize,
-    pos_x: Float,
-    pos_y: Float,
-    theta: Float,
-    phase: Float,
+pub(crate) struct Particle {
+    pub(crate) id: usize,
+    pub(crate) pos_x: Float,
+    pub(crate) pos_y: Float,
+    pub(crate) theta: Float,
+    pub(crate) phase: Float,
 }
 
 // TODO: the random number generators here are instantiating each invocation. Instead, we should
@@ -227,6 +227,10 @@ impl Particles {
     /// Get the number of particles
     pub(crate) fn len(&self) -> usize {
         self.0.len()
+    }
+
+    pub(crate) fn iter(&self) -> std::slice::Iter<'_, Particle> {
+        self.0.iter()
     }
 }
 

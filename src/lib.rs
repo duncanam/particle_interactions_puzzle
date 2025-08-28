@@ -6,7 +6,7 @@ mod simulation;
 mod types;
 
 // Exports for pure Rust use
-pub use simulation::Simulation;
+pub use simulation::{Simulation, SimulationData};
 pub use types::{
     AbsoluteTime, DomainBoundaryLength, Noise, ParticleDistanceThreshold, RelativeTime, Speed,
 };
@@ -23,6 +23,7 @@ struct PySimulation(Simulation);
 
 #[pymethods]
 impl PySimulation {
+    /// Construct a new particle Simulator
     #[new]
     fn new(
         num_particles: usize,
@@ -48,16 +49,47 @@ impl PySimulation {
         )?))
     }
 
+    /// Timestep the simulation
     fn to_timestepped(&self) -> Self {
         Self(self.0.to_timestepped())
-    }
-
-    fn thing(&self) -> String {
-        "thing".to_string()
     }
 
     #[pyo3(name = "__repr__")]
     fn repr(&self) -> String {
         self.0.to_string()
+    }
+
+    fn get_data(&self) -> PySimulationData {
+        PySimulationData((&self.0).into())
+    }
+}
+
+#[pyclass(name = "SimulationData")]
+struct PySimulationData(SimulationData);
+
+#[pymethods]
+impl PySimulationData {
+    #[getter]
+    fn x(&self) -> Vec<f64> {
+        // Must clone because Python has no concept of ownership lol
+        self.0.x.clone()
+    }
+
+    #[getter]
+    fn y(&self) -> Vec<f64> {
+        // Must clone because Python has no concept of ownership lol
+        self.0.y.clone()
+    }
+
+    #[getter]
+    fn u(&self) -> Vec<f64> {
+        // Must clone because Python has no concept of ownership lol
+        self.0.u.clone()
+    }
+
+    #[getter]
+    fn v(&self) -> Vec<f64> {
+        // Must clone because Python has no concept of ownership lol
+        self.0.v.clone()
     }
 }

@@ -1,1 +1,2 @@
 from particle_interactions_puzzle.particle_interactions_puzzle import Simulation
+from particle_interactions_puzzle.plotting import plot_simulation_timestep
