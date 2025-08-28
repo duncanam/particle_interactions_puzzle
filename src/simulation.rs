@@ -16,7 +16,7 @@ const MAX_STATIONARY_ORDER_PARAM_ITERATIONS: usize = 5000;
 /// Defines the sliding window size for stationary order parameter
 const STATIONARY_ORDER_PARAM_AVG_WINDOWSIZE: usize = 100;
 
-const STATIONARY_ORDER_EPSILON: Float = 0.01;
+const STATIONARY_ORDER_EPSILON: Float = 0.001;
 
 // By putting these parameters in their own struct it also makes the copy update more readable and
 // easier to maintain
@@ -83,10 +83,13 @@ impl Simulation {
             self.params.boundary_side_length,
         );
 
+        let instantaneous_order = particles.compute_instantaneous_order();
+
         let current_time = self.current_time + self.params.timestep;
 
         Self {
             particles,
+            instantaneous_order,
             current_time,
             params: self.params,
         }
@@ -94,11 +97,13 @@ impl Simulation {
 
     /// Compute the stationary order parameter, which is the temporal average of the particle
     /// system polarization
-    pub fn compute_stationary_order_parameter(self) -> anyhow::Result<Float> {
-        let mut sim = self;
+    pub fn compute_stationary_order_parameter(&self) -> anyhow::Result<Float> {
+        // Get an initial simulation
+        let mut sim = self.to_timestepped();
+
+        // This will store a sliding window of our instantaneous orders
         let mut instantaneous_order_window =
             VecDeque::with_capacity(STATIONARY_ORDER_PARAM_AVG_WINDOWSIZE);
-        let mut stationary_order_parameter;
 
         for _ in 0..MAX_STATIONARY_ORDER_PARAM_ITERATIONS {
             sim = sim.to_timestepped();
@@ -110,12 +115,14 @@ impl Simulation {
             instantaneous_order_window.push_back(sim.instantaneous_order.0);
 
             // Sliding average of the parameter over time
-            stationary_order_parameter = instantaneous_order_window.iter().sum::<Float>()
+            // TODO: could consider a running sum to optimize
+            let stationary_order_parameter = instantaneous_order_window.iter().sum::<Float>()
                 / instantaneous_order_window.len() as f64;
 
-            // Convergence criteria
-            if (sim.instantaneous_order.0 - stationary_order_parameter).abs()
-                <= STATIONARY_ORDER_EPSILON
+            // Convergence criteria- also ensure window is full
+            if instantaneous_order_window.len() == STATIONARY_ORDER_PARAM_AVG_WINDOWSIZE
+                && (sim.instantaneous_order.0 - stationary_order_parameter).abs()
+                    <= STATIONARY_ORDER_EPSILON
             {
                 return Ok(stationary_order_parameter);
             }

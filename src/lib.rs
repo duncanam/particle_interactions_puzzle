@@ -55,6 +55,12 @@ impl PySimulation {
         Self(self.0.to_timestepped())
     }
 
+    /// Compute the stationary order parameter
+    fn compute_stationary_order_parameter(&self) -> PyResult<Float> {
+        // We have to Ok(fn()?) to coerce anyhow error into PyResult
+        Ok(self.0.compute_stationary_order_parameter()?)
+    }
+
     #[pyo3(name = "__repr__")]
     fn repr(&self) -> String {
         self.0.to_string()
