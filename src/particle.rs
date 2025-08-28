@@ -23,6 +23,7 @@ impl Particle {
         MAX_PARTICLE_ANGLE * rand::random::<f64>()
     }
 
+    /// Create a new particle with random initialization
     fn new(boundary_side_length: f64) -> Self {
         let pos_x = Self::sample_random_linear_position(boundary_side_length);
         let pos_y = Self::sample_random_linear_position(boundary_side_length);
@@ -42,7 +43,15 @@ impl Particle {
 pub(crate) struct Particles(Box<[Particle]>);
 
 impl Particles {
+    /// Create a new collection of particles with random initialization
     fn new(num_particles: usize, boundary_side_length: f64) -> Self {
-        todo!()
+        Self(
+            // For each particle...
+            (0..num_particles)
+                // ...instantiate a random new one...
+                .map(|_| Particle::new(boundary_side_length))
+                // ...then collect all the particles together into this data structure.
+                .collect(),
+        )
     }
 }
