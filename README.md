@@ -101,4 +101,45 @@ and there are some display convenience traits implemented for printout in Python
 This file also contains a `SimulationData` struct that acts as an API layer
 for pulling out particle state for easy plotting.
 
+#### Particles
+`particle.rs` is the bread and butter of this package. This sets up a particle collection
+`Particles` which hold each individual `Particle` instances. `Particle`s are instantiated
+with a random position and orientation, through the constructor on `Particles`. The phase
+$\xi$ is also computed for each particle at this point (but is also updated for each
+timestep).
 
+On `Particles`, `to_timestepped()` iterates over each particle and integrates forward
+their state in time. It then collects back a new collection of newly-integrated `Particle`s.
+It also has `compute_instantaneous_order()`, which using the provided function from the
+assignment, computes the instantaneous order of the collection of particles leveraging
+a complex number crate.
+
+`Particle` has a lot going on. Outside of the randomized initialization (which noted,
+could be more efficient by pre-initializing the thread-local random number generator),
+it has a Euclidean distance calculator that also takes into account the periodic
+boundary conditions of the simulation domain. In general, periodic BCs are enforced
+using a Euclidean remainder, which in Rust allows us to use `%` but with floats.
+You may notice that many of the helper functions are annotated with `inline`, and
+this is just to encourage compiler optimization by reducing function calls.
+Both positional and orientation update helper functions exist, and this is where
+the math is located for the forward integration. These are `compute_new_theta()` and
+`compute_new_coords()`. It should be noted that we leverage Euler's formula to
+decompose the real and imaginary parts. The timestep function, `to_timestepped()`,
+calls each update method for the fields and samples a new random phase $\xi$. It
+also enforces periodic boundary conditions using the remainder logic. Another
+utility on this struct is `compute_idxs_closest()`. When called on a particle,
+it inefficiently iterates over all particles besides itself and computes the
+distances to each particle, then only grabbing the close particles given the
+target radius. In practice this is `O(n^2)`. This can probably be reduced to
+`O(n(log(n)))` if using a technique like k-d trees to decompose the domain,
+but for simplicity and time the existing technique was used. However, `kiddo`
+would be a good crate candidate to do this calc if we wanted to expand it in
+the future.
+
+#### Types
+`types.rs` introduces zero-cost (removed by LLVM at compile-time) type wrappers that
+give us type stability so we don't mix up floats when passing them around the codebase.
+It also introduces a type alias for floats, such that the codebase can be swapped
+between 64-bit and 32-bit if desired. I've found it's much easier to do this upfront
+rather than go back and add it later. A convenience macro exists to create the
+types, which also implements `+` between themselves and `*` with a float.

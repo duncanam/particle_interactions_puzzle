@@ -18,6 +18,7 @@ macro_rules! create_quantity {
         #[derive(Copy, Clone, Debug)]
         pub struct $name(pub Float);
 
+        /// Implements quantity * quantity
         impl Add for $name {
             type Output = $name;
             fn add(self, rhs: Self) -> Self::Output {
@@ -25,6 +26,7 @@ macro_rules! create_quantity {
             }
         }
 
+        /// Implements quantity * float
         impl Mul<Float> for $name {
             type Output = $name;
             fn mul(self, rhs: Float) -> Self::Output {
