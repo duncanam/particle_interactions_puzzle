@@ -41,11 +41,39 @@ impl Particle {
         Self::sample_random_angular_position() - PI
     }
 
-    /// Compute the shortest distance between this particle and another particle
+    /// Compute the Euclidean distance delta for a periodic BC
+    // Snagged formula from online
     #[inline]
-    fn compute_euclidean_distance(&self, other: &Self) -> Float {
-        // sqrt((x2-x1)^2 - (y2-y1)^2)
-        ((other.pos_x - self.pos_x).square() + (other.pos_y - self.pos_y).square()).sqrt()
+    fn compute_euclidean_coord_delta_w_periodic(
+        x1: Float,
+        x2: Float,
+        boundary_side_length: DomainBoundaryLength,
+    ) -> Float {
+        let dx = (x1 - x2).rem_euclid(boundary_side_length.0);
+        dx.min(boundary_side_length.0 - dx)
+    }
+
+    /// Compute the shortest distance between this particle and another particle
+    ///
+    /// sqrt((x2-x1)^2 - (y2-y1)^2)
+    #[inline]
+    fn compute_euclidean_distance(
+        &self,
+        other: &Self,
+        boundary_side_length: DomainBoundaryLength,
+    ) -> Float {
+        let dx = Self::compute_euclidean_coord_delta_w_periodic(
+            self.pos_x,
+            other.pos_x,
+            boundary_side_length,
+        );
+        let dy = Self::compute_euclidean_coord_delta_w_periodic(
+            self.pos_y,
+            other.pos_y,
+            boundary_side_length,
+        );
+
+        (dx.square() + dy.square()).sqrt()
     }
 
     /// Create a new particle with random initialization
@@ -74,8 +102,10 @@ impl Particle {
         distance_threshold: ParticleDistanceThreshold,
         speed: Speed,
         noise: Noise,
+        boundary_side_length: DomainBoundaryLength,
     ) -> Float {
-        let idxs_closest = self.compute_idxs_closest(particles, distance_threshold);
+        let idxs_closest =
+            self.compute_idxs_closest(particles, distance_threshold, boundary_side_length);
 
         // This is "|s_i(t)|"
         let num_closest = idxs_closest.0.len();
@@ -132,7 +162,13 @@ impl Particle {
         delta_time: RelativeTime,
         boundary_side_length: DomainBoundaryLength,
     ) -> Self {
-        let theta = self.compute_new_theta(particles, distance_threshold, speed, noise);
+        let theta = self.compute_new_theta(
+            particles,
+            distance_threshold,
+            speed,
+            noise,
+            boundary_side_length,
+        );
         let (pos_x, pos_y) = self.compute_new_coords(speed, delta_time);
         let phase = Self::sample_random_phase();
 
@@ -161,6 +197,7 @@ impl Particle {
         &self,
         particles: &Particles,
         distance_threshold: ParticleDistanceThreshold,
+        boundary_side_length: DomainBoundaryLength,
     ) -> IdxsNeighborParticles {
         IdxsNeighborParticles(
             particles
@@ -171,7 +208,10 @@ impl Particle {
                 .filter(|particle| self.id != particle.id)
                 // ...and then for each particle we compute the euclidean distance between them,
                 // filtering out any particles that are further away than our threshold...
-                .filter(|particle| self.compute_euclidean_distance(particle) < distance_threshold.0)
+                .filter(|particle| {
+                    self.compute_euclidean_distance(particle, boundary_side_length)
+                        < distance_threshold.0
+                })
                 // ...and then we snag the remaining, filtered indices for particles we know are
                 // within the threshold distance...
                 .map(|particle| particle.id)
