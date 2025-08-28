@@ -67,6 +67,11 @@ impl PySimulation {
     fn boundary_side_length(&self) -> f64 {
         self.0.params.boundary_side_length.0
     }
+
+    #[getter]
+    fn current_time(&self) -> f64 {
+        self.0.current_time.0
+    }
 }
 
 #[pyclass(name = "SimulationData")]

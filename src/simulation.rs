@@ -15,16 +15,16 @@ use crate::{
 #[derive(Copy, Clone)]
 pub(crate) struct SimulationParameters {
     pub(crate) boundary_side_length: DomainBoundaryLength,
-    noise: Noise,
-    speed: Speed,
-    timestep: RelativeTime,
-    particle_distance_threshold: ParticleDistanceThreshold,
+    pub(crate) noise: Noise,
+    pub(crate) speed: Speed,
+    pub(crate) timestep: RelativeTime,
+    pub(crate) particle_distance_threshold: ParticleDistanceThreshold,
 }
 
 /// A particle interaction simulator
 pub struct Simulation {
-    particles: Particles,
-    current_time: AbsoluteTime,
+    pub(crate) particles: Particles,
+    pub(crate) current_time: AbsoluteTime,
     pub(crate) params: SimulationParameters,
 }
 

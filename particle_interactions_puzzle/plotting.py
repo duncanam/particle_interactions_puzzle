@@ -23,4 +23,5 @@ def plot_simulation_timestep(sim):
     ax.set_aspect("equal")
     ax.set_xlim(0, sim.boundary_side_length)
     ax.set_ylim(0, sim.boundary_side_length)
+    plt.title(f"Particle Simulation, t={sim.current_time:.2f}")
     plt.show()
